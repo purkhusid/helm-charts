@@ -15,9 +15,9 @@ metadata:
     {{- include "temporal.resourceLabels" (list $ $service "deployment") | nindent 4 }}
 spec:
   {{- if $serviceValues.replicaCount }}
-  replicas: {{ default $serviceValues.replicaCount }}
+  replicas: {{ $serviceValues.replicaCount }}
   {{- else if $.Values.server.replicaCount }}
-  replicas: {{ default $.Values.server.replicaCount }}
+  replicas: {{ $.Values.server.replicaCount }}
   {{- end }}
   {{- with (default $.Values.server.deploymentStrategy $serviceValues.deploymentStrategy) }}
   strategy:
