@@ -2,6 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: {{ include "temporal.kubernetesNamespace" $ }}
   name: {{ include "temporal.componentname" (list $ "web") }}
   annotations:
     {{- include "temporal.resourceAnnotations" (list $ "web" "deployment") | nindent 4 }}
@@ -30,7 +31,7 @@ spec:
       initContainers:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{ include "temporal.serviceAccount" $ }}
+      {{ include "temporal.componentServiceAccount" (list $ "web") }}
       {{- if or .Values.web.additionalVolumes .Values.web.tls.enabled }}
       volumes:
       {{- if .Values.web.additionalVolumes }}
@@ -49,7 +50,7 @@ spec:
               {{- if .Values.web.temporalAddress }}
               value: {{ .Values.web.temporalAddress }}
               {{- else }}
-              value: {{ include "temporal.frontendAddress.fqdn" $ }}
+              value: {{ include "temporal.frontendAddress" $ }}
               {{- end }}
           {{- if .Values.web.tls.enabled }}
           {{- include "temporal.web.tls.env" $ | nindent 12 }}

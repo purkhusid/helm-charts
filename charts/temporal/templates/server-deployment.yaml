@@ -8,6 +8,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: {{ include "temporal.kubernetesNamespace" $ }}
   name: {{ include "temporal.componentname" (list $ $service) }}
   annotations:
     {{- include "temporal.resourceAnnotations" (list $ $service "deployment") | nindent 4 }}
@@ -45,7 +46,7 @@ spec:
       labels:
         {{- include "temporal.resourceLabels" (list $ $service "pod") | nindent 8 }}
     spec:
-      {{ include "temporal.serviceAccount" $ }}
+      {{ include "temporal.componentServiceAccount" (list $ $service) }}
       {{- with $.Values.server.securityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
