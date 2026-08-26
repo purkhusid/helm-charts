@@ -1,7 +1,13 @@
 {{- if $.Values.server.enabled }}
 {{- range $service := (list "frontend" "internal-frontend" "history" "matching" "worker") }}
 {{- $serviceValues := index $.Values.server $service }}
-{{- $replicaCount := ternary $serviceValues.replicaCount $.Values.server.replicaCount (hasKey $serviceValues "replicaCount") }}
+{{- $replicaCount := $.Values.server.replicaCount }}
+{{- if eq $replicaCount nil }}
+{{- $replicaCount = 1 }}
+{{- end }}
+{{- if and (hasKey $serviceValues "replicaCount") (ne $serviceValues.replicaCount nil) }}
+{{- $replicaCount = $serviceValues.replicaCount }}
+{{- end }}
 {{- if and $serviceValues.enabled (gt ($replicaCount | int) 0) ($serviceValues.podDisruptionBudget) }}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
