@@ -1,6 +1,7 @@
 suite: test image references
 templates:
   - server-deployment.yaml
+  - server-configmap.yaml
   - web-deployment.yaml
   - admintools-deployment.yaml
   - server-job.yaml
@@ -71,19 +72,22 @@ tests:
           path: spec.containers[0].image
           value: example.com/admin-tools:v4.5.6
 
-  - it: pins images by digest when a digest is set
+  - it: pins images by digest, ignoring any tag
     set:
       server:
         image:
           repository: example.com/server
+          tag: v1.2.3
           digest: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       admintools:
         image:
           repository: example.com/admin-tools
+          tag: v4.5.6
           digest: sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
       web:
         image:
           repository: example.com/ui
+          tag: v7.8.9
           digest: sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
     asserts:
       - template: templates/server-deployment.yaml
@@ -145,22 +149,6 @@ tests:
       - equal:
           path: spec.template.spec.containers[?(@.name=='done')].image
           value: example.com/admin-tools@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-
-  - it: prefers the digest over the tag when both are set
-    set:
-      server:
-        image:
-          repository: example.com/server
-          tag: v1.2.3
-          digest: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-    template: templates/server-deployment.yaml
-    documentSelector:
-      path: metadata.name
-      value: RELEASE-NAME-temporal-frontend
-    asserts:
-      - equal:
-          path: spec.template.spec.containers[0].image
-          value: example.com/server@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
   - it: keeps digests per component
     set:
